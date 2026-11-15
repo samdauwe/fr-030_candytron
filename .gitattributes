@@ -1,0 +1,5 @@
+# GitHub language statistics: the header-only libraries are C
+*.h linguist-language=C
+third_party/** linguist-vendored
+# the production data is binary and must never be touched by line-ending conversion (the tests check its SHA-256)
+assets/* binary

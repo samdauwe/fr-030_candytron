@@ -1,0 +1,79 @@
+# candytron oracle fixture (see doc/REFERENCE.md)
+# build: clang -m32 x87 (control word 0x143f: 24-bit significand, round down), -O0; the original GenThree sources, intro player (-D_PLAYER)
+# default.pac sha256 650835ca24d28d434e2d590eb454035026adcfc1e8d8824efd0e0da0dd61ac0d
+# josie.v2m sha256 5bf17fb8d58d608cfa197d2309ecd629e5465698abf05338a4894c385ea5303b (not used by the oracle: the audio is not part of it)
+# babe.mesh (the NEW format of the source tree; the executable has babe.mesh.old) sha256 c3c4a29cec3938e1b7e06d21c40b44651fdae5c9f8cd9f3c3fce4626442aa803
+RT 0 1024x1024 flags=00000081 format=0 frame=0
+RT 1 512x256 flags=00000081 format=0 frame=0
+RT 2 512x256 flags=00000081 format=0 frame=0
+RT 3 512x256 flags=00000081 format=0 frame=0
+RT 4 256x256 flags=00000081 format=0 frame=0
+RT 5 256x256 flags=00000081 format=0 frame=0
+RT 6 256x256 flags=00000081 format=0 frame=0
+RT 7 128x64 flags=00000081 format=0 frame=0
+RT 8 128x64 flags=00000081 format=0 frame=0
+RT 9 128x64 flags=00000081 format=0 frame=0
+ADD 10 256x256 flags=00000098 format=2 frame=0
+UPD 10 256x256 sha256=ac82a506489ea5fbb82aad5800f86471ba6919896317b7cd4d1422b8f12b2913 levels=9 mipchain=5a9f9f329763ae5adcf4da87e6ee6162b7c6db4e2f643b23b871148b6f387edd
+ADD 11 256x256 flags=00000098 format=2 frame=0
+UPD 11 256x256 sha256=ebef3d64903bc7a2532dd857f9c2dacc7e7560f83d8728efe39a597b6e3be66e levels=9 mipchain=10470156c97e370308c9d45dbeaa3c36ff64bac4868fa1ea2e4beb7f489207f4
+FONT arial "030" bitmap 256x256 at 8,25 size -64x61 (left blank)
+ADD 12 256x256 flags=00000098 format=2 frame=0
+UPD 12 256x256 sha256=6ea8bdf60e8a6278028afc02d46c213a965c7dd6d698318d69bde2ce666796a0 levels=9 mipchain=7f25c7b38825f0b53e97e0f3ff1e7b7bd21170215b161fe26eaa7c5f509b3912
+ADD 13 256x256 flags=00000098 format=2 frame=0
+UPD 13 256x256 sha256=13725724ae691b924243b22aa3957bb585ad7b12f68587852f273eb16c0ae9bd levels=9 mipchain=e8490c5ca3e09001f637ac413b577dd8f89a8102ff1270cabfe1cee15558d508
+ADD 14 256x256 flags=00000098 format=2 frame=0
+UPD 14 256x256 sha256=42b33c9353b6130f24bd683ead39e0b4aa146f72a79de5c6bcea8a11e4deb3df levels=9 mipchain=cfd99239963c78bdbeb67fe77efa6d269289cf5c12ebb5180fc3d539def3883e
+ADD 15 256x256 flags=00000098 format=2 frame=0
+UPD 15 256x256 sha256=0ecf57a3b86d9149b1b60457d04abf06ecb25b24c534d73ff79d974d9f7e6915 levels=9 mipchain=93755ab5b6d2b1a886f57b0f228be4193bad274d1c513e9da3b8e037d96185aa
+FONT arial "030" bitmap 256x256 at 8,25 size -64x61 (left blank)
+ADD 16 256x256 flags=00000098 format=2 frame=0
+UPD 16 256x256 sha256=6ea8bdf60e8a6278028afc02d46c213a965c7dd6d698318d69bde2ce666796a0 levels=9 mipchain=7f25c7b38825f0b53e97e0f3ff1e7b7bd21170215b161fe26eaa7c5f509b3912
+ADD 17 256x256 flags=00000098 format=2 frame=0
+UPD 17 256x256 sha256=deebf57fad866b38cb6a56e3a0d1d25cbed5daef5f68e46028ebef7371c89b29 levels=9 mipchain=994f3d23edb83df24c1a9c430db13b875ab16fa3cf902ce9e633b8165e7b9e6b
+ADD 18 256x256 flags=00000098 format=2 frame=0
+UPD 18 256x256 sha256=ac82a506489ea5fbb82aad5800f86471ba6919896317b7cd4d1422b8f12b2913 levels=9 mipchain=5a9f9f329763ae5adcf4da87e6ee6162b7c6db4e2f643b23b871148b6f387edd
+ADD 19 256x256 flags=00000098 format=2 frame=0
+UPD 19 256x256 sha256=fcc723d84f270a69da85b93cfc2b639abb6aed74e401de78683ea9be85a963f6 levels=9 mipchain=6473c9b53ce9ef7020261231c6d5a1180b61172c7cbf622071045f81d3449db0
+ADD 20 256x256 flags=00000098 format=2 frame=0
+UPD 20 256x256 sha256=04ac666c64535a2bd1f555d7c9c2f49aec7ba688d80988935f5542366cee085d levels=9 mipchain=d4f72473f4a6b0b7dc2cb28ef09bed6bc2af4efeea48f13fa30a25b4d91defbc
+FONT arial "chaos  ryg" bitmap 256x256 at 0,5 size 18x91 (left blank)
+FONT arial "    giZMo" bitmap 256x256 at 13,87 size 16x70 (left blank)
+FONT arial "           kb" bitmap 256x256 at 2,141 size 18x113 (left blank)
+ADD 21 256x256 flags=00000098 format=2 frame=0
+UPD 21 256x256 sha256=8a39d2abd3999ab73c34db2476849cddf303ce389b35826850f9a700589b4a90 levels=9 mipchain=5e0d16f16f223a1098065962888430a9c4f09f337847ac5d830e9a4a80d6e515
+ADD 22 256x256 flags=00000098 format=2 frame=0
+UPD 22 256x256 sha256=deebf57fad866b38cb6a56e3a0d1d25cbed5daef5f68e46028ebef7371c89b29 levels=9 mipchain=994f3d23edb83df24c1a9c430db13b875ab16fa3cf902ce9e633b8165e7b9e6b
+ADD 23 256x256 flags=00000098 format=2 frame=0
+UPD 23 256x256 sha256=ac82a506489ea5fbb82aad5800f86471ba6919896317b7cd4d1422b8f12b2913 levels=9 mipchain=5a9f9f329763ae5adcf4da87e6ee6162b7c6db4e2f643b23b871148b6f387edd
+ADD 24 256x256 flags=00000098 format=2 frame=0
+UPD 24 256x256 sha256=fcc723d84f270a69da85b93cfc2b639abb6aed74e401de78683ea9be85a963f6 levels=9 mipchain=6473c9b53ce9ef7020261231c6d5a1180b61172c7cbf622071045f81d3449db0
+ADD 25 256x256 flags=00000098 format=2 frame=0
+UPD 25 256x256 sha256=ac82a506489ea5fbb82aad5800f86471ba6919896317b7cd4d1422b8f12b2913 levels=9 mipchain=5a9f9f329763ae5adcf4da87e6ee6162b7c6db4e2f643b23b871148b6f387edd
+ADD 26 256x256 flags=00000098 format=2 frame=0
+UPD 26 256x256 sha256=deebf57fad866b38cb6a56e3a0d1d25cbed5daef5f68e46028ebef7371c89b29 levels=9 mipchain=994f3d23edb83df24c1a9c430db13b875ab16fa3cf902ce9e633b8165e7b9e6b
+FONT arial "farb" bitmap 256x256 at 5,166 size 63x56 (left blank)
+FONT arial "rausch" bitmap 256x256 at -1,-16 size 37x61 (left blank)
+ADD 27 256x256 flags=00000098 format=2 frame=0
+UPD 27 256x256 sha256=25c49495bfb1f8635234f607e144f93416f2b1b41c3386068172eedc29a51ec8 levels=9 mipchain=c51e0d28a4748551c27ef52b915b82b5b3f6c5962095b1934e1c6c997a2dd4f5
+ADD 28 256x256 flags=00000098 format=2 frame=0
+UPD 28 256x256 sha256=512c295b29626ff9c781199a666e74ba1c1d3c71a78b4e3bbd0024356b677fba levels=9 mipchain=51c05992c52b1ab86f0f8ee9209f7f324aadf64894b0ab278b8fb6fb01417ec4
+ADD 29 256x256 flags=00000098 format=2 frame=0
+UPD 29 256x256 sha256=2fa0cf64355f423701f183bfb56becc491ce43bebfa8b6e6625fc1b5560b00d9 levels=9 mipchain=174121c0e478eb70d2b627053b5f557232a74cbba54ef2859a4d496c52cee756
+ADD 30 256x256 flags=00000098 format=2 frame=0
+UPD 30 256x256 sha256=591f39cb6b879eac59785d34ba8abcc2b9ac183c2d160542993f5ecb36bd8367 levels=9 mipchain=4f4bc7bf1c50e7aaa1fa586c0eb5bf7c00801cd992259a71a124475e41e3fba7
+ADD 31 256x256 flags=00000098 format=2 frame=0
+UPD 31 256x256 sha256=82661fddfab4015b8794dd0974536f27c6f4a5ef0edad5a27ecb764d978c247f levels=9 mipchain=a91f6059f07d63245bc0bb099f9aea501cd7c19301ee2cc13d8c3839f9e08093
+ADD 32 256x256 flags=00000098 format=2 frame=0
+UPD 32 256x256 sha256=acb34a82857548778916b93a7ec4aac0b07bc68f980de486b1f41128d89c98f4 levels=9 mipchain=3f57a9a5d2f09ad8135e359735f0aa823b86686bb694d7078fe3d7abb5e033f7
+ADD 33 256x256 flags=00000098 format=2 frame=0
+UPD 33 256x256 sha256=2f34e46564e340469c341465c2d22004595e387dbd2479a16fac87dab0abb271 levels=9 mipchain=1e5e45ec322da5b58b5207fbedafca81bfd3eed28db1f3887cf0ed546eecfe73
+ADD 34 256x256 flags=00000098 format=2 frame=0
+UPD 34 256x256 sha256=ac82a506489ea5fbb82aad5800f86471ba6919896317b7cd4d1422b8f12b2913 levels=9 mipchain=5a9f9f329763ae5adcf4da87e6ee6162b7c6db4e2f643b23b871148b6f387edd
+ADD 35 256x256 flags=00000098 format=2 frame=0
+UPD 35 256x256 sha256=de19b9bc897867823768c36f6c787a91dbe5c49d59407aa3ed08e0f09a91bef2 levels=9 mipchain=bfb742d1901ff3587bf3e40b69f0374cc23ccccc4ab58570c9ed93ba8586c2cb
+ADD 36 256x256 flags=00000098 format=2 frame=0
+UPD 36 256x256 sha256=866f2017d96eac0004a1338abcde87b9604d8ffa04ced565895c318fc4c9129c levels=9 mipchain=fc264d7d4f15fdcaf190418e91be9b16b5573009cc8691903b5561a7d0298bdf
+FONT arial ".oO3o." bitmap 256x256 at -4,71 size 39x98 (left blank)
+ADD 37 256x256 flags=00000098 format=2 frame=0
+UPD 37 256x256 sha256=866c192ed0307c2e417fda0da92811a70aa34dfb45261df0de9624874fd54609 levels=9 mipchain=44feba4064e45da8da037508581e8a95e34de81980bc36df2ab434d650fe8fc7

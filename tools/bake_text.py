@@ -1,0 +1,133 @@
+#!/usr/bin/env python3
+"""Bakes the coverage of the strings of Bitmap_Text.
+
+The original asks Windows GDI for "arial" (RenderFont of _startintro.cpp): lfHeight = -height (the em in pixels), lfWidth = width (the average character width in
+pixels, so the font is stretched horizontally by |width| / the average character width of the font that is used), antialiased, white on black, ExtTextOut at x, y (the top
+of the cell). The wall text of the demo asks for a width of -64 at a height of 61: with Arial's own average (904/2048 em) that would be a stretch of 2.38. Under Wine,
+where the original runs on Linux, "arial" is mapped to Liberation Sans, whose average is 1187/2048 em (a stretch of 1.81), and the text of recordings made that way matches
+this model best. Liberation Sans is also what this player ships, so its own average is the consistent one. Arial cannot be redistributed and GDI cannot be reproduced; this
+script renders the distinct calls of the script (read from the FONT lines of the oracle's tex.txt) with Liberation Sans (metric compatible with Arial, SIL Open Font
+License 1.1) through the same model and writes include/candytron/core/text_data.h.
+
+  tools/bake_text.py [--font <LiberationSans-Regular.ttf>] [--fixture <tex.txt>] [--out <text_data.h>] [--preview <dir>]
+
+Needs Pillow (and fontTools, optionally, to read the average from the font). The output is deterministic for a given Pillow / FreeType; the committed header is the
+reference. Run clang-format on the header afterwards (cmake --build build/release --target format).
+"""
+import argparse
+import os
+import re
+import sys
+
+from PIL import Image, ImageDraw, ImageFont
+
+LIBERATION_AVG_CHAR = 1187  # xAvgCharWidth of Liberation Sans Regular (the OS/2 table, in 2048ths of an em): what lfWidth is scaled against
+ARIAL_AVG_CHAR = LIBERATION_AVG_CHAR / 2048.0
+SUPER = 8                      # supersampling per axis
+LINE = re.compile(r'^FONT arial "(.*)" bitmap (\d+)x(\d+) at (-?\d+),(-?\d+) size (-?\d+)x(-?\d+)')
+
+
+def render(font_path, text, bmx, bmy, x, y, width, height, avg_char=ARIAL_AVG_CHAR, shift=(0.0, 0.0), scale=(1.0, 1.0)):
+    """The 8 bit coverage of the string: bmx * bmy bytes, as GDI's blue channel."""
+    em = abs(height) * scale[1]
+    k = abs(width) * scale[0] / (avg_char * em) if width else 1.0  # the horizontal stretch
+    font = ImageFont.truetype(font_path, em * SUPER)
+    big_w = int(round(bmx / k * SUPER))
+    big = Image.new("L", (big_w, bmy * SUPER), 0)
+    ImageDraw.Draw(big).text(((x + shift[0]) / k * SUPER, (y + shift[1]) * SUPER), text, font=font, fill=255, anchor="la")
+    return big.resize((bmx, bmy), Image.BOX)
+
+
+def main():
+    here = os.path.dirname(os.path.abspath(__file__))
+    root = os.path.dirname(here)
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--font", default="/usr/share/fonts/liberation-sans-fonts/LiberationSans-Regular.ttf")
+    ap.add_argument("--fixture", default=os.path.join(root, "tests/data/candytron/oracle/tex.txt"))
+    ap.add_argument("--out", default=os.path.join(root, "include/candytron/core/text_data.h"))
+    ap.add_argument("--avg-char", type=float, default=None, help="xAvgCharWidth of the font in 2048ths of an em (default: read from the font's OS/2 table, 1187 for Liberation Sans Regular)")
+    ap.add_argument("--scale", default="1,1", help="scale the glyphs by SX,SY (experiments)")
+    ap.add_argument("--shift", default="0,0", help="move the origin of the text by DX,DY pixels (experiments)")
+    ap.add_argument("--preview", default=None, help="write the coverage of every call as a PNG into this directory")
+    args = ap.parse_args()
+
+    avg = args.avg_char
+    if avg is None:
+        try:
+            from fontTools.ttLib import TTFont
+            font = TTFont(args.font)
+            avg = font["OS/2"].xAvgCharWidth * 2048.0 / font["head"].unitsPerEm
+        except ImportError:
+            avg = LIBERATION_AVG_CHAR
+
+    calls = []
+    for line in open(args.fixture, encoding="utf-8"):
+        m = LINE.match(line)
+        if m:
+            text = m.group(1)
+            nums = [int(v) for v in m.groups()[1:]]
+            key = (text, *nums)
+            if key not in calls:
+                calls.append(key)
+    if not calls:
+        sys.exit("no FONT lines in " + args.fixture)
+
+    entries = []
+    for (text, bmx, bmy, x, y, w, h) in calls:
+        img = render(args.font, text, bmx, bmy, x, y, w, h, avg / 2048.0, tuple(float(v) for v in args.shift.split(',')), tuple(float(v) for v in args.scale.split(',')))
+        if args.preview:
+            os.makedirs(args.preview, exist_ok=True)
+            img.save(os.path.join(args.preview, "text_%d_%d_%s.png" % (x, y, re.sub(r"\W", "_", text))))
+        bbox = img.getbbox() or (0, 0, 0, 0)
+        px = img.load()
+        rows = []
+        for yy in range(bbox[1], bbox[3]):
+            rows.extend(px[xx, yy] for xx in range(bbox[0], bbox[2]))
+        entries.append((text, bmx, bmy, x, y, w, h, bbox, rows))
+
+    out = []
+    out.append("/* Generated by tools/bake_text.py from the FONT lines of tests/data/candytron/oracle/tex.txt: do not edit.\n"
+               " *\n"
+               " * The coverage (0..255) of the %d strings of Bitmap_Text, rendered with Liberation Sans (SIL Open Font License 1.1, see\n"
+               " * third_party/licenses/liberation-fonts-LICENSE.txt) through the model of the original's GDI call (lfHeight = -height, lfWidth = width, antialiased,\n"
+               " * the horizontal stretch against the average character width of the font that is used: %d/2048 em for Liberation Sans Regular). Each entry is the box that holds the string, run length coded: a byte pair (n, v)\n"
+               " * is n pixels of value v, n in 1..255, row after row. */\n" % (len(entries), round(avg)))
+    out.append("#ifndef GT3_TEXT_DATA_H_INCLUDED\n#define GT3_TEXT_DATA_H_INCLUDED\n\n#include <stdint.h>\n\n/* clang-format off */\n")
+    out.append("typedef struct gt3_text_entry {\n  const char *text;\n  int16_t bitmap_w, bitmap_h, x, y, cw, ch;  /* the call's arguments, in the order of RenderFont */\n"
+               "  int16_t box_x, box_y, box_w, box_h; /* the box of the coverage inside the bitmap */\n  const uint8_t *rle;\n  uint32_t rle_size;\n} gt3_text_entry;\n\n")
+    total = 0
+    for i, e in enumerate(entries):
+        rows = e[8]
+        rle = []
+        j = 0
+        while j < len(rows):
+            v = rows[j]
+            n = 1
+            while j + n < len(rows) and rows[j + n] == v and n < 255:
+                n += 1
+            rle += [n, v]
+            j += n
+        total += len(rle)
+        out.append("static const uint8_t gt3_text_rle%d[%d] = {\n" % (i, max(len(rle), 1)))
+        line = " "
+        for b in rle or [0]:
+            tok = " %d," % b
+            if len(line) + len(tok) > 150:
+                out.append(line + "\n")
+                line = " "
+            line += tok
+        out.append(line + "\n};\n\n")
+    out.append("static const gt3_text_entry gt3_text_entries[] = {\n")
+    for i, e in enumerate(entries):
+        text, bmx, bmy, x, y, w, h, bbox, rows = e
+        esc = text.replace("\\", "\\\\").replace('"', '\\"')
+        bw, bh = bbox[2] - bbox[0], bbox[3] - bbox[1]
+        out.append('  {"%s", %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, gt3_text_rle%d, sizeof gt3_text_rle%d},\n' % (esc, bmx, bmy, x, y, w, h, bbox[0], bbox[1], bw, bh, i, i))
+    out.append("};\n/* clang-format on */\n\n#define GT3_TEXT_ENTRIES %d\n\n#endif /* GT3_TEXT_DATA_H_INCLUDED */\n" % len(entries))
+    with open(args.out, "w", encoding="utf-8", newline="\n") as f:
+        f.write("".join(out))
+    print("%d calls, %d bytes of run lengths -> %s" % (len(entries), total, args.out))
+
+
+if __name__ == "__main__":
+    main()

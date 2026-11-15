@@ -1,0 +1,21 @@
+# golden frames of the original, the regression bound of the suite player_golden (see doc/REFERENCE.md)
+# frame_<time>.ppm: the original (a recording of its executable under Wine, +-1 frame, 800x600 reduced by 8x8 means) at that song time; the port is compared at 100x75
+# <song time> <RMSE limit> <the port's RMSE when the limit was made>
+10 3.00 0.00
+20 4.83 1.83
+30 4.62 1.62
+40 3.86 0.86
+50 10.45 7.45
+60 15.45 11.89
+70 7.14 4.14
+80 45.52 35.01
+90 24.86 19.12
+100 17.93 13.79
+110 15.44 11.88
+120 3.54 0.54
+130 27.49 21.15
+140 18.74 14.41
+150 25.11 19.32
+160 5.41 2.41
+170 5.58 2.58
+180 7.06 4.06

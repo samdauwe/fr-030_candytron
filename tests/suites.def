@@ -1,0 +1,43 @@
+/* The test suites, in the order they are started.
+ *
+ *   SUITE(<name>, <function>, <time limit in seconds>, <SUITE_* flags or 0>, <arguments...>, NULL)
+ *
+ * The function is `int <function>(int argc, char **argv)` and finds its arguments in argv[1...]; ASSETS is the directory with the
+ * production data (assets/), FIXTURES the fixtures derived from it (tests/data/candytron/), DATA the reference fixtures (tests/data/).
+ * The limits are generous: a sanitizer build multiplies them through CANDYTRON_TEST_TIMEOUT_SCALE. */
+
+/* the libraries */
+SUITE("sha256", suite_sha256, 60, 0, NULL)
+SUITE("assets", suite_assets, 60, 0, ASSETS, FIXTURES, NULL)
+SUITE("bitmap", suite_bitmap, 60, 0, NULL)
+SUITE("csl_vm", suite_csl_vm, 60, 0, NULL)
+SUITE("mesh", suite_mesh, 120, 0, ASSETS, FIXTURES "/mesh", NULL)
+SUITE("csl_trace", suite_csl_trace, 300, 0, ASSETS, FIXTURES "/oracle", FIXTURES "/mesh", NULL)
+SUITE("csl_trace_exe_mesh", suite_csl_trace, 300, 0, ASSETS, FIXTURES "/oracle", FIXTURES "/mesh", "old", NULL)
+SUITE("textures", suite_textures, 300, 0, ASSETS, FIXTURES "/oracle", NULL)
+SUITE("render_geo", suite_render_geo, 300, 0, ASSETS, FIXTURES "/oracle", FIXTURES "/mesh", NULL)
+SUITE("render_geo_collect", suite_render_geo, 300, 0, ASSETS, FIXTURES "/oracle", FIXTURES "/mesh", "collect", NULL)
+SUITE("v2", suite_v2, 300, 0, ASSETS, FIXTURES "/oracle", NULL)
+
+/* the player's SDL-free core */
+SUITE("player_args", suite_player_args, 60, 0, NULL)
+SUITE("player_view", suite_player_view, 60, 0, NULL)
+SUITE("player_credits", suite_player_credits, 60, 0, NULL)
+SUITE("player_glcheck", suite_player_glcheck, 60, 0, NULL)
+SUITE("player_audio", suite_player_audio, 60, 0, ASSETS, NULL)
+
+/* the player executable, started headless (SDL offscreen video); the cases with a window skip without an OpenGL ES context */
+SUITE("player_licenses", suite_player_cli, 60, 0, "licenses", NULL)
+SUITE("player_version", suite_player_cli, 60, 0, "version", NULL)
+SUITE("player_bad_args", suite_player_cli, 60, 0, "bad_args", NULL)
+SUITE("assets_player_verify", suite_player_cli, 60, 0, "verify_assets", NULL)
+SUITE("assets_player_missing", suite_player_cli, 60, 0, "missing_assets", NULL)
+SUITE("assets_player_tampered", suite_player_cli, 60, SUITE_SERIAL, "tampered_assets", NULL)
+SUITE("assets_player_tampered_live", suite_player_cli, 60, SUITE_SERIAL, "tampered_assets_live", NULL)
+SUITE("player_window", suite_player_cli, 120, SUITE_SERIAL, "window", NULL)
+SUITE("player_audio_live", suite_player_cli, 120, SUITE_SERIAL, "audio", NULL)
+SUITE("player_start", suite_player_cli, 120, SUITE_SERIAL, "start", NULL)
+SUITE("player_soak", suite_player_cli, 120, SUITE_SERIAL, "soak", NULL)
+SUITE("player_selftest", suite_player_cli, 120, SUITE_SERIAL, "selftest", NULL)
+SUITE("player_capture", suite_player_cli, 180, SUITE_SERIAL, "capture", NULL)
+SUITE("player_golden", suite_player_cli, 180, SUITE_SERIAL, "golden", NULL)

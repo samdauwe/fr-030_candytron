@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="description" content="fr-030: Candytron, the 2003 demo by Farbrausch, played in the browser: a C99 port, WebAssembly and WebGL 2.">
+<title>fr-030: Candytron</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #000; color: #e8e8e8; font: 16px/1.5 system-ui, sans-serif; }
+  main { min-height: 100%; display: grid; place-content: center; justify-items: center; gap: 1rem; padding: 1.5rem; text-align: center; box-sizing: border-box; }
+  h1 { margin: 0; font-size: 2rem; font-weight: 600; letter-spacing: .02em; }
+  p { margin: 0; max-width: 34rem; color: #aaa; }
+  button { font: inherit; color: #fff; background: #d6336c; border: 1px solid #d6336c; border-radius: .4rem; padding: .5rem .9rem; font-weight: 600; cursor: pointer; }
+  button:disabled { opacity: .5; cursor: default; }
+  :focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+  #status { min-height: 1.5em; color: #ddd; }
+  #status.error { color: #ff8a70; }
+  small { color: #999; }
+  details { max-width: 44rem; width: 100%; text-align: left; color: #bbb; }
+  summary { cursor: pointer; text-align: center; color: #9bc; }
+  pre { max-height: 40vh; overflow: auto; margin: .6rem 0 0; padding: .6rem; background: #111; border: 1px solid #333; border-radius: .3rem;
+        font: 12px/1.4 ui-monospace, monospace; white-space: pre-wrap; color: #ccc; }
+  kbd { font: inherit; font-size: .85em; border: 1px solid #555; border-radius: .25rem; padding: 0 .3em; color: #ddd; }
+  a { color: #9bc; }
+  #canvas { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; background: #000; outline: none; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main id="start">
+  <h1>fr-030: Candytron</h1>
+  <p>The 2003 demo by Farbrausch (Breakpoint 2003, 2nd place): chaos, ryg, gizmo and kb. It is made on your machine: the textures, the models and the
+  music are generated from the production's 120 KB of data, as it was in 2003. Three minutes with sound; it needs WebGL 2.</p>
+  <button id="go" type="button">Start</button>
+  <p id="status" role="status"></p>
+  <small><kbd>Space</kbd> pause &middot; <kbd>&larr;</kbd> <kbd>&rarr;</kbd> 10 seconds back and forward &middot; <kbd>Home</kbd> the beginning &middot; <kbd>F</kbd> fullscreen</small>
+  <details id="credits">
+    <summary>Credits and licenses</summary>
+    <pre id="credits-text" tabindex="0">Loading&hellip;</pre>
+  </details>
+  <noscript><p>This page needs JavaScript and WebGL 2.</p></noscript>
+</main>
+<canvas id="canvas" hidden tabindex="-1" oncontextmenu="event.preventDefault()"></canvas>
+<script>
+"use strict";
+const $ = (id) => document.getElementById(id);
+const say = (text, error) => { $("status").textContent = text; $("status").className = error ? "error" : ""; };
+
+const hasWebGL2 = () => {
+  try {
+    const gl = document.createElement("canvas").getContext("webgl2");
+    if (gl) gl.getExtension("WEBGL_lose_context")?.loseContext();
+    return !!gl;
+  } catch (e) {
+    return false;
+  }
+};
+
+const query = new URLSearchParams(location.search);
+// ?args=... passes more command-line options to the player (tests and measurements: --gl-check --exit-after 5)
+const extraArguments = (query.get("args") || "").split(/\s+/).filter(Boolean);
+
+if (!hasWebGL2()) {
+  $("go").disabled = true;
+  say("This browser does not offer WebGL 2. Try a current Chrome, Edge, Firefox or Safari.", true);
+}
+
+const loadScript = (src) => new Promise((resolve, reject) => {
+  const s = document.createElement("script");
+  s.src = src;
+  s.onload = resolve;
+  s.onerror = () => reject(new Error(src + " did not load"));
+  document.head.append(s);
+});
+
+// the credits and the notices are the player's own (candytron --licenses): the same module, started with that option, prints them
+let creditsShown = false;
+$("credits").addEventListener("toggle", async () => {
+  if (!$("credits").open || creditsShown) return;
+  creditsShown = true;
+  const lines = [];
+  try {
+    if (typeof createCandytron === "undefined") await loadScript("index.js");
+    await createCandytron({ arguments: ["--licenses"], print: (t) => lines.push(t), printErr: () => {} });
+    $("credits-text").textContent = lines.join("\n");
+  } catch (e) {
+    creditsShown = false;
+    $("credits-text").textContent = "The credits did not load: " + String(e.message || e);
+  }
+});
+
+const finish = (text, error) => {
+  $("canvas").hidden = true;
+  $("start").hidden = false;
+  $("go").disabled = false;
+  $("go").textContent = "Play again";
+  $("go").onclick = () => { location.search = ""; };
+  say(text, error);
+};
+
+$("go").onclick = async () => {
+  $("go").disabled = true;
+  say("Loading\u2026");
+  try {
+    if (typeof createCandytron === "undefined") await loadScript("index.js");
+    // index.data (the three production files, 120 KB) is downloaded before the player starts
+    const progress = (text) => {
+      const m = /\((\d+)\/(\d+)\)/.exec(text);
+      if (m) say("Downloading\u2026 " + (m[1] / 1024).toFixed(0) + " of " + (m[2] / 1024).toFixed(0) + " KB");
+      else if (text) say(text);
+    };
+    window.candytronModule = {
+      canvas: $("canvas"),
+      arguments: [...extraArguments],
+      setStatus: progress,
+      preRun: [() => { // the data has arrived: from here the canvas is the player's
+        $("start").hidden = true;
+        $("canvas").hidden = false;
+        window.candytronStarted = performance.now();
+      }],
+      print: (text) => console.log(text),
+      printErr: (text) => {
+        console.error(text);
+        if (text.startsWith("candytron:")) say(text, true);
+      },
+      onAbort: () => finish("The player stopped unexpectedly, see the console.", true),
+      onEnded: (code) => {
+        window.candytronEnded = code;
+        finish(code ? "The player stopped, see the console." : "That was it.", code !== 0);
+      },
+    };
+    await createCandytron(window.candytronModule);
+  } catch (e) {
+    console.error(e);
+    finish(String(e.message || e), true);
+  }
+};
+</script>
+</body>
+</html>
